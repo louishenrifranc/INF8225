@@ -1,0 +1,37 @@
+Running in wrapper mode for '4095'
+
+Running python job.
+
+Namespace(batch_size=3, debug=False, gaussian_noise=True, learning_rate=0.0024104270019531253, momentum=1.2876953124999999, nb_epochs=32, nb_features=101, nb_targets=4, optimizer=u'rmsprop', patience=50, plot=False, test_p=0.15, val_p=0.15)
+/home/lh/.local/lib/python2.7/site-packages/numpy/core/fromnumeric.py:2889: RuntimeWarning: Mean of empty slice.
+  out=out, **kwargs)
+/home/lh/.local/lib/python2.7/site-packages/numpy/core/_methods.py:80: RuntimeWarning: invalid value encountered in double_scalars
+  ret = ret.dtype.type(ret / rcount)
+----------------------------------------
+Problem running the job:
+(<type 'exceptions.SystemExit'>, SystemExit(0,), <traceback object at 0x7fdd53c4c368>)
+Traceback (most recent call last):
+  File "/home/lh/spearmint/spearmint/spearmint/runner.py", line 41, in job_runner
+    elif job.language == PYTHON: run_python_job(job)
+  File "/home/lh/spearmint/spearmint/spearmint/runner.py", line 131, in run_python_job
+    result = module.main(job.id, params)
+  File "/home/lh/spearmint/spearmint/examples/tp2/myTP2.py", line 323, in main
+    return float(train(args))
+  File "/home/lh/spearmint/spearmint/examples/tp2/myTP2.py", line 271, in train
+    log_likelihood.append(lr.forward_pass(X_train_batch, y_train_batch))
+  File "/home/lh/spearmint/spearmint/examples/tp2/myTP2.py", line 183, in forward_pass
+    self._bacward_pass()
+  File "/home/lh/spearmint/spearmint/examples/tp2/myTP2.py", line 231, in _bacward_pass
+    self.updates.append(self.learning_rate * self.gradients[:, :, -1])
+  File "/home/lh/spearmint/spearmint/examples/tp2/myTP2.py", line 101, in append
+    self.array = np.dstack((self.array, new_value))
+  File "/home/lh/.local/lib/python2.7/site-packages/numpy/lib/shape_base.py", line 376, in dstack
+    return _nx.concatenate([atleast_3d(_m) for _m in tup], 2)
+  File "/home/lh/spearmint/spearmint/bin/../spearmint/main.py", line 323, in sigint_handler
+    sys.exit(0)
+SystemExit: 0
+None
+----------------------------------------
+Job file reloaded.
+Could not find value in output file.
+Job failed in 887.97 seconds.

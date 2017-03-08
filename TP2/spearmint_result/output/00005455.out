@@ -1,0 +1,12 @@
+Running in wrapper mode for '5455'
+
+Running python job.
+
+Namespace(batch_size=1065, debug=False, gaussian_noise=False, learning_rate=0.0095544879150390623, momentum=0.52880859375, nb_epochs=32, nb_features=101, nb_targets=4, optimizer=u'rmsprop', patience=41, plot=False, test_p=0.15, val_p=0.15)
+LA
+Got result -0.813705
+
+Job file reloaded.
+Completed successfully in 2.23 seconds. [-0.813705]
+setting job 5455 complete
+set...

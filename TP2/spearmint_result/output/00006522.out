@@ -1,0 +1,12 @@
+Running in wrapper mode for '6522'
+
+Running python job.
+
+Namespace(batch_size=10111, debug=False, gaussian_noise=False, learning_rate=0.0040789613037109382, momentum=1.0809570312500001, nb_epochs=32, nb_features=101, nb_targets=4, optimizer=u'sgd', patience=46, plot=False, test_p=0.15, val_p=0.15)
+LA
+Got result -0.729175
+
+Job file reloaded.
+Completed successfully in 6.35 seconds. [-0.729175]
+setting job 6522 complete
+set...

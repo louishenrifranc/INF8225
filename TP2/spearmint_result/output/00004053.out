@@ -1,0 +1,12 @@
+Running in wrapper mode for '4053'
+
+Running python job.
+
+Namespace(batch_size=11195, debug=False, gaussian_noise=False, learning_rate=0.0035040676269531253, momentum=0.62519531250000004, nb_epochs=32, nb_features=101, nb_targets=4, optimizer=u'nesterov', patience=48, plot=False, test_p=0.15, val_p=0.15)
+LA
+Got result -0.761592
+
+Job file reloaded.
+Completed successfully in 4.96 seconds. [-0.761592]
+setting job 4053 complete
+set...

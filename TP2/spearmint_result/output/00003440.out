@@ -1,0 +1,12 @@
+Running in wrapper mode for '3440'
+
+Running python job.
+
+Namespace(batch_size=880, debug=False, gaussian_noise=False, learning_rate=0.0072829865722656255, momentum=1.2728515625000001, nb_epochs=32, nb_features=101, nb_targets=4, optimizer=u'sgd', patience=44, plot=False, test_p=0.15, val_p=0.15)
+LA
+Got result -0.810833
+
+Job file reloaded.
+Completed successfully in 1.93 seconds. [-0.810833]
+setting job 3440 complete
+set...

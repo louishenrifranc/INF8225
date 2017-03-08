@@ -1,0 +1,12 @@
+Running in wrapper mode for '8027'
+
+Running python job.
+
+Namespace(batch_size=4931, debug=False, gaussian_noise=False, learning_rate=0.0098840447998046876, momentum=0.76650390625000009, nb_epochs=32, nb_features=101, nb_targets=4, optimizer=u'rmsprop', patience=26, plot=False, test_p=0.15, val_p=0.15)
+LA
+Got result -0.771851
+
+Job file reloaded.
+Completed successfully in 2.23 seconds. [-0.771851]
+setting job 8027 complete
+set...

@@ -1,0 +1,12 @@
+Running in wrapper mode for '1935'
+
+Running python job.
+
+Namespace(batch_size=805, debug=False, gaussian_noise=False, learning_rate=0.0040972700195312508, momentum=0.73164062500000004, nb_epochs=32, nb_features=101, nb_targets=4, optimizer=u'rmsprop', patience=19, plot=False, test_p=0.15, val_p=0.15)
+LA
+Got result -0.808371
+
+Job file reloaded.
+Completed successfully in 1.68 seconds. [-0.808371]
+setting job 1935 complete
+set...

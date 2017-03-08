@@ -1,0 +1,29 @@
+Running in wrapper mode for '13782'
+
+Running python job.
+
+Namespace(batch_size=8392, debug=False, gaussian_noise=False, learning_rate=0.0053758286743164066, momentum=0.717529296875, nb_epochs=32, nb_features=101, nb_targets=4, optimizer=u'momemtum', patience=41, plot=False, test_p=0.15, val_p=0.15)
+----------------------------------------
+Problem running the job:
+(<type 'exceptions.TypeError'>, TypeError("'NoneType' object has no attribute '__getitem__'",), <traceback object at 0x7f4b40c0ec20>)
+Traceback (most recent call last):
+  File "/home/lh/spearmint/spearmint/spearmint/runner.py", line 41, in job_runner
+    elif job.language == PYTHON: run_python_job(job)
+  File "/home/lh/spearmint/spearmint/spearmint/runner.py", line 131, in run_python_job
+    result = module.main(job.id, params)
+  File "/home/lh/spearmint/spearmint/examples/tp2/myTP2.py", line 323, in main
+    return float(train(args))
+  File "/home/lh/spearmint/spearmint/examples/tp2/myTP2.py", line 271, in train
+    log_likelihood.append(lr.forward_pass(X_train_batch, y_train_batch))
+  File "/home/lh/spearmint/spearmint/examples/tp2/myTP2.py", line 183, in forward_pass
+    self._bacward_pass()
+  File "/home/lh/spearmint/spearmint/examples/tp2/myTP2.py", line 240, in _bacward_pass
+    self.W += self.updates[:, :, -1] + gaussian_noise
+  File "/home/lh/spearmint/spearmint/examples/tp2/myTP2.py", line 107, in __getitem__
+    return self.array[key]
+TypeError: 'NoneType' object has no attribute '__getitem__'
+None
+----------------------------------------
+Job file reloaded.
+Could not find value in output file.
+Job failed in 0.94 seconds.

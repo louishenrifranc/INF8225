@@ -1,0 +1,16 @@
+Running in wrapper mode for '11743'
+
+Running python job.
+
+Namespace(batch_size=572, debug=False, gaussian_noise=True, learning_rate=0.0035730304565429693, momentum=1.224853515625, nb_epochs=32, nb_features=101, nb_targets=4, optimizer=u'nesterov', patience=50, plot=False, test_p=0.15, val_p=0.15)
+/home/lh/spearmint/spearmint/examples/tp2/myTP2.py:142: RuntimeWarning: overflow encountered in exp
+  numerator = np.exp(np.matmul(self.W, x))
+/home/lh/spearmint/spearmint/examples/tp2/myTP2.py:155: RuntimeWarning: invalid value encountered in divide
+  return np.divide(numerator, denominator), z
+LA
+Got result -0.283956
+
+Job file reloaded.
+Completed successfully in 1.30 seconds. [-0.283956]
+setting job 11743 complete
+set...

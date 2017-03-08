@@ -1,0 +1,15 @@
+Best result: -0.825605
+Job-id: 19167
+Parameters: 
+name: "batch_size"
+int_val: 621
+name: "optimizer"
+str_val: "rmsprop"
+name: "patience"
+int_val: 37
+name: "learning_rate"
+dbl_val: 0.00658511935425
+name: "gaussian_noise"
+str_val: "False"
+name: "momentum"
+dbl_val: 0.694311523438

@@ -1,0 +1,12 @@
+Running in wrapper mode for '13107'
+
+Running python job.
+
+Namespace(batch_size=3790, debug=False, gaussian_noise=True, learning_rate=0.00015662408447265626, momentum=1.2882324218750001, nb_epochs=32, nb_features=101, nb_targets=4, optimizer=u'rmsprop', patience=16, plot=False, test_p=0.15, val_p=0.15)
+LA
+Got result -0.777185
+
+Job file reloaded.
+Completed successfully in 7.11 seconds. [-0.777185]
+setting job 13107 complete
+set...

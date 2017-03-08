@@ -1,0 +1,11 @@
+digraph {
+	"Maitrise du Python"
+	"Maitrise de Matlab"
+	"Utilisation de pmtk3"
+	"Charge de Lab satisfait"
+	"Débogage nécessaire"
+		"Maitrise du Python" -> "Utilisation de pmtk3"
+		"Maitrise de Matlab" -> "Utilisation de pmtk3"
+		"Utilisation de pmtk3" -> "Charge de Lab satisfait"
+		"Utilisation de pmtk3" -> "Débogage nécessaire"
+}

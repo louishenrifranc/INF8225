@@ -1,0 +1,16 @@
+Running in wrapper mode for '0'
+
+Running python job.
+
+Namespace(batch_size=1, debug=False, gaussian_noise=True, learning_rate=9.9999999999999995e-07, momentum=0.5, nb_epochs=32, nb_features=101, nb_targets=4, optimizer=u'sgd', patience=5, plot=False, test_p=0.15, val_p=0.15)
+/home/lh/.local/lib/python2.7/site-packages/numpy/core/fromnumeric.py:2889: RuntimeWarning: Mean of empty slice.
+  out=out, **kwargs)
+/home/lh/.local/lib/python2.7/site-packages/numpy/core/_methods.py:80: RuntimeWarning: invalid value encountered in double_scalars
+  ret = ret.dtype.type(ret / rcount)
+LA
+Got result -0.222405
+
+Job file reloaded.
+Completed successfully in 1.18 seconds. [-0.222405]
+setting job 0 complete
+set...
