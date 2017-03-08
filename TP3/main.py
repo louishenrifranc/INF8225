@@ -13,7 +13,7 @@ if __name__ == '__main__':
     parser.add_argument('--dropout_p', type=float, default=0.7, help='Dropout probability')
     parser.add_argument('--input_size', type=int, default=784, help='Input size')
     parser.add_argument('--nb_targets', type=int, default=10, help='Nb targets')
-    parser.add_argument('--nb_iter', type=int, default=100, help='Number of epochs')
+    parser.add_argument('--nb_iter', type=int, default=50, help='Number of epochs')
     parser.add_argument('--optimizer',
                         default=tf.train.AdamOptimizer,
                         help='Size of a batch')

@@ -19,22 +19,29 @@ def __reshape_mnist_image(batch, twoD_to_fourD=False):
         return np.reshape(batch, (len(batch), 784))
 
 
-def get_next_batch_training(batch_size):
+def get_next_batch_training(data_generator, batch, batch_size):
     nb_batches = 0
-    for x_batch, y_batch in datagen.flow(__reshape_mnist_image(mnist.train.images, True), mnist.train.labels,
-                                         batch_size=batch_size):
-        if nb_batches == (len(mnist.train.images) // batch_size):
+    for x_batch, y_batch in data_generator.flow(__reshape_mnist_image(batch.images, True), batch.labels,
+                                                batch_size=batch_size):
+        if nb_batches == (len(batch.images) // batch_size):
             break
         nb_batches += 1
         yield __reshape_mnist_image(x_batch), y_batch
 
 
-datagen = ImageDataGenerator(featurewise_center=True,
-                             featurewise_std_normalization=True,
-                             zca_whitening=True,
-                             width_shift_range=0.2,
-                             height_shift_range=0.2)
-datagen.fit(__reshape_mnist_image(mnist.train.images, True), augment=True)
+def get_data_transformer(dataset):
+    datagen = ImageDataGenerator(featurewise_center=True,  # Centrer les données
+                                 featurewise_std_normalization=True,  # Reduire les données
+                                 zca_whitening=True,  # Decorreler les pixels
+                                 width_shift_range=0.2,  # Shifter l'image en largeur
+                                 height_shift_range=0.2)  # Shifter l'image en hauteur
+    datagen.fit(__reshape_mnist_image(dataset, True), augment=True)
+    return datagen
+
+
+train_gene = get_data_transformer(mnist.train.images)
+val_gene = get_data_transformer(mnist.validation.images)
+test_gene = get_data_transformer(mnist.test.images)
 
 
 class NN:
@@ -81,7 +88,6 @@ class NN:
             A dictionnary to use to feed the graph placeholder
         """
         is_training = False
-        batch_x, batch_y = batch.next_batch(batch_size)
         return {
             self.x: batch_x,
             self.y: batch_y,
@@ -96,20 +102,20 @@ class NN:
         """
 
         tf.summary.image("image", tensor=tf.reshape(self.x, (self.batch_size, 28, 28, 1)), max_outputs=10)
+        x = self.x
+        # x = layers.dropout(self.x, keep_prob=0.7)
+        # with tf.variable_scope("layer1") as scope:
+        h = tf.nn.relu(layers.fully_connected(x, num_outputs=self.input_size // 2, activation_fn=None))
+        # tf.summary.histogram("moving_mean1", tf.get_variable(scope + "moving_mean"))
+        # with tf.variable_scope("layer2") as scope:
+        #     h = tf.nn.relu(layers.fully_connected(h, num_outputs=32, activation_fn=None))
+        # tf.summary.histogram("moving_mean2", tf.get_variable("moving_mean"))
+        # with tf.variable_scope("layer3") as scope:
+        self.logits = layers.fully_connected(h, num_outputs=10, activation_fn=None)
+        # tf.summary.histogram("moving_mean3", tf.get_variable("moving_mean"))
 
-        x = layers.dropout(self.x, keep_prob=0.7)
-        with tf.variable_scope("layer1") as scope:
-            h = tf.nn.relu(layers.fully_connected(x, num_outputs=64, activation_fn=None))
-            # tf.summary.histogram("moving_mean1", tf.get_variable(scope + "moving_mean"))
-        with tf.variable_scope("layer2") as scope:
-            h = tf.nn.relu(layers.fully_connected(h, num_outputs=32, activation_fn=None))
-            # tf.summary.histogram("moving_mean2", tf.get_variable("moving_mean"))
-        with tf.variable_scope("layer3") as scope:
-            self.logits = layers.fully_connected(h, num_outputs=10, activation_fn=None)
-            # tf.summary.histogram("moving_mean3", tf.get_variable("moving_mean"))
-
-            self.probability = tf.nn.softmax(self.logits)
-            self.prediction = tf.argmax(self.probability, axis=1)
+        self.probability = tf.nn.softmax(self.logits)
+        self.prediction = tf.argmax(self.probability, axis=1)
 
     def _loss(self):
         """
@@ -184,7 +190,7 @@ class NN:
 
     def _train_epoch(self, summary_writer):
         self.n_train_batches = mnist.train.images.shape[0] // self.batch_size
-        for x_batch, y_batch in get_next_batch_training(self.batch_size):
+        for x_batch, y_batch in get_next_batch_training(train_gene, mnist.train, self.batch_size):
             _, loss, accuracy, summary_str = self.sess.run(
                 [self.train_dis, self.loss, self.accuracy, self.merged_summary_op],
                 feed_dict={self.x: x_batch,
@@ -206,13 +212,19 @@ class NN:
 
     def _test_epoch(self, batch, summary_writer):
         name = "test" if batch == mnist.test else "val"
-
+        generator = test_gene if name == "test" else val_gene
         step = self.sess.run(self.global_step) // self.n_train_batches
         mean_accuracy, mean_loss = 0, 0
         n_batches = len(batch.images) // self.batch_size
-        for _ in range(n_batches):
+
+        for x_batch, y_batch in get_next_batch_training(generator, batch, self.batch_size):
             accuracy_itr, loss_itr = self.sess.run([self.accuracy, self.loss],
-                                                   feed_dict=self._feed_dict(batch, self.batch_size))
+                                                   feed_dict={
+                                                       self.x: x_batch,
+                                                       self.y: y_batch,
+                                                       self.is_training: False,
+                                                       self.learning_rate_placholder: self.lr
+                                                   })
             mean_accuracy += accuracy_itr
             mean_loss += loss_itr
         mean_accuracy /= n_batches
