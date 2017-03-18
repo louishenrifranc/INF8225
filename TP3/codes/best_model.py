@@ -2,10 +2,46 @@ import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 from tensorflow.contrib import layers
 from tqdm import tqdm
+from keras.preprocessing.image import ImageDataGenerator
+from keras import backend as K
+import numpy as np
 
+K.set_image_dim_ordering('tf')
 epsilon = 1e-4
 
 mnist = input_data.read_data_sets('MNIST_data', one_hot=True, validation_size=5000)
+
+
+def __reshape_mnist_image(batch, twoD_to_fourD=False):
+    if twoD_to_fourD:
+        return np.reshape(batch, (len(batch), 28, 28, 1))
+    else:
+        return np.reshape(batch, (len(batch), 784))
+
+
+def get_next_batch_training(data_generator, batch, batch_size):
+    nb_batches = 0
+    for x_batch, y_batch in data_generator.flow(__reshape_mnist_image(batch.images, True), batch.labels,
+                                                batch_size=batch_size):
+        if nb_batches == (len(batch.images) // batch_size):
+            break
+        nb_batches += 1
+        yield __reshape_mnist_image(x_batch), y_batch
+
+
+def get_data_transformer(dataset):
+    datagen = ImageDataGenerator(featurewise_center=True,  # Centrer les données
+                                 featurewise_std_normalization=True,  # Reduire les données
+                                 zca_whitening=True,  # Decorreler les pixels
+                                 width_shift_range=0.2,  # Shifter l'image en largeur
+                                 height_shift_range=0.2)  # Shifter l'image en hauteur
+    datagen.fit(__reshape_mnist_image(dataset, True), augment=True)
+    return datagen
+
+
+train_gene = get_data_transformer(mnist.train.images)
+val_gene = get_data_transformer(mnist.validation.images)
+test_gene = get_data_transformer(mnist.test.images)
 
 
 class NN:
@@ -26,7 +62,6 @@ class NN:
         self.activation = args.activation
         self.optimizer = args.optimizer
 
-        # self.batch_norm = layers.batch_norm if args.batch_norm == True else None
         self.global_step = tf.Variable(initial_value=0, trainable=False, name="global_step")
         self.sess = tf.InteractiveSession()
 
@@ -41,45 +76,22 @@ class NN:
         self.learning_rate_placholder = tf.placeholder(dtype=tf.float32)
         self.optimizer = self.optimizer(learning_rate=self.learning_rate_placholder)
 
-    def _feed_dict(self, batch, batch_size):
-        """
-        Helper to feed next batch
-        :param batch: tf.Dataset
-            mnist.train or mnist.test or mnist.validation
-        :param batch_size: Int (default: None)
-            Batch size, or the first dimension of all placeholder
-        :return:
-            A dictionnary to use to feed the graph placeholder
-        """
-        is_training = True if batch == mnist.train else False
-        batch_x, batch_y = batch.next_batch(batch_size)
-        return {
-            self.x: batch_x,
-            self.y: batch_y,
-            self.is_training: is_training,
-            self.learning_rate_placholder: self.lr
-        }
-
     def _forward(self):
         """
         Helper to create the forward pass in the graph
         :return:
         """
 
-        # Hidden layer
-        w1 = tf.get_variable("W1", initializer=tf.contrib.layers.xavier_initializer(),
-                             shape=(self.input_size, self.input_size / 2))
-        b1 = tf.get_variable("b1", initializer=tf.contrib.layers.xavier_initializer(), shape=self.input_size / 2)
-        self.h1 = tf.nn.relu(tf.matmul(self.x, w1) + b1)
+        x = layers.dropout(self.x, keep_prob=0.7)
+        h = layers.fully_connected(x, num_outputs=128, activation_fn=tf.nn.relu)
+        h = layers.batch_norm(h, is_training=self.is_training, decay=0.9, scale=True)
+        h = tf.nn.relu(h)
 
-        # Logit
-        w2 = tf.get_variable("W2", initializer=tf.contrib.layers.xavier_initializer(),
-                             shape=(self.input_size / 2, self.nb_targets))
-        b2 = tf.get_variable("b2", initializer=tf.contrib.layers.xavier_initializer(), shape=self.nb_targets)
-        self.logits = tf.matmul(self.h1, w2) + b2
+        h = layers.fully_connected(h, num_outputs=64)
+        h = layers.batch_norm(h, is_training=self.is_training, decay=0.9, scale=True)
+        h = tf.nn.relu(h)
 
-        # h1 = layers.fully_connected(self.x, num_outputs=self.input_size // 2, activation_fn=None)
-        # self.logits = layers.fully_connected(h1, num_outputs=self.nb_targets, activation_fn=None)
+        self.logits = layers.fully_connected(h, num_outputs=10, activation_fn=None)
 
         self.probability = tf.nn.softmax(self.logits)
         self.prediction = tf.argmax(self.probability, axis=1)
@@ -91,11 +103,8 @@ class NN:
             Output of the forward pass
         :return:
         """
-        # cross_entropy = tf.reduce_mean(
-        #     tf.nn.softmax_cross_entropy_with_logits(labels=self.y, logits=self.logits))
-
         cross_entropy = tf.reduce_mean(-tf.log(self.probability + epsilon) * self.y)
-        self.loss = cross_entropy  # + tf.add_n(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES))
+        self.loss = cross_entropy
 
         self.accuracy = tf.reduce_mean(
             tf.cast(tf.equal(tf.argmax(self.y, 1), self.prediction), tf.float32))
@@ -107,19 +116,24 @@ class NN:
         """
         # Retrieve all trainable variables
         train_variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
-
-        # Compute the gradient (return a pair of variable and their respective gradient)
-        grads = self.optimizer.compute_gradients(loss=self.loss, var_list=train_variables)
-        self.train_dis = self.optimizer.apply_gradients(grads, global_step=self.global_step)
+        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        with tf.control_dependencies(update_ops):
+            # Compute the gradient (return a pair of variable and their respective gradient)
+            grads = self.optimizer.compute_gradients(loss=self.loss, var_list=train_variables)
+            self.train_dis = self.optimizer.apply_gradients(grads, global_step=self.global_step)
 
     def _summary(self):
         """
         Helper that create operation for tf.Summary
         :return:
         """
-        trainable_variable = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
-        for var in trainable_variable:
+        summary_variable = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
+        summary_variable.extend(tf.get_collection(tf.GraphKeys.UPDATE_OPS))
+
+        for var in summary_variable:
+            print(var.op.name)
             tf.summary.histogram(var.op.name, var)
+
         self.merged_summary_op = tf.summary.merge_all()
 
     def build(self):
@@ -158,9 +172,13 @@ class NN:
 
     def _train_epoch(self, summary_writer):
         self.n_train_batches = mnist.train.images.shape[0] // self.batch_size
-        for itr in range(self.n_train_batches):
-            _, loss, accuracy = self.sess.run([self.train_dis, self.loss, self.accuracy],
-                                              feed_dict=self._feed_dict(mnist.train, self.batch_size))
+        for x_batch, y_batch in get_next_batch_training(train_gene, mnist.train, self.batch_size):
+            _, loss, accuracy, summary_str = self.sess.run(
+                [self.train_dis, self.loss, self.accuracy, self.merged_summary_op],
+                feed_dict={self.x: x_batch,
+                           self.y: y_batch,
+                           self.is_training: True,
+                           self.learning_rate_placholder: self.lr})
             summary_accuracy = tf.Summary(value=[
                 tf.Summary.Value(tag="accuracy_train", simple_value=accuracy),
             ])
@@ -171,14 +189,28 @@ class NN:
                                        global_step=self.sess.run(self.global_step))
             summary_writer.add_summary(summary_loss,
                                        global_step=self.sess.run(self.global_step))
+            summary_writer.add_summary(summary_str, global_step=self.sess.run(self.global_step))
 
     def _test_epoch(self, batch, summary_writer):
         name = "test" if batch == mnist.test else "val"
 
         step = self.sess.run(self.global_step) // self.n_train_batches
+        mean_accuracy, mean_loss = 0, 0
+        n_batches = len(batch.images) // self.batch_size
+        generator = test_gene if name == "test" else val_gene
+        for x_batch, y_batch in get_next_batch_training(generator, batch, self.batch_size):
+            accuracy_itr, loss_itr = self.sess.run([self.accuracy, self.loss],
+                                                   feed_dict={
+                                                       self.x: x_batch,
+                                                       self.y: y_batch,
+                                                       self.is_training: False,
+                                                       self.learning_rate_placholder: self.lr
+                                                   })
+            mean_accuracy += accuracy_itr
+            mean_loss += loss_itr
+        mean_accuracy /= n_batches
+        mean_loss /= n_batches
 
-        mean_accuracy, mean_loss = self.sess.run([self.accuracy, self.loss],
-                                                 feed_dict=self._feed_dict(batch, len(batch.images)))
         summary_accuracy = tf.Summary(value=[
             tf.Summary.Value(tag="mean_accuracy{}".format(name), simple_value=mean_accuracy),
         ])

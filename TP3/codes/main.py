@@ -3,7 +3,7 @@ import argparse
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--batch_size', type=int, default=100, help='Size of a batch')
+    parser.add_argument('--batch_size', type=int, default=64, help='Size of a batch')
     parser.add_argument('--activation', default=tf.nn.relu, help='Activation function')
     parser.add_argument('--lr', type=float, default=0.001, help='Learning rate')
     parser.add_argument('--l1_reg', type=float, default=0.00, help='L1 regularization')
@@ -13,11 +13,11 @@ if __name__ == '__main__':
     parser.add_argument('--dropout_p', type=float, default=0.7, help='Dropout probability')
     parser.add_argument('--input_size', type=int, default=784, help='Input size')
     parser.add_argument('--nb_targets', type=int, default=10, help='Nb targets')
-    parser.add_argument('--nb_iter', type=int, default=50, help='Number of epochs')
+    parser.add_argument('--nb_iter', type=int, default=100, help='Number of epochs')
     parser.add_argument('--optimizer',
                         default=tf.train.AdamOptimizer,
                         help='Size of a batch')
-    parser.add_argument('--experiment', type=str, default="NM")
+    parser.add_argument('--experiment', type=str, default="NN")
     args = parser.parse_args()
 
     if args.experiment == "LR":
